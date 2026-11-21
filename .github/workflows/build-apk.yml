@@ -1,0 +1,41 @@
+
+name: Build YouTube Player APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/YouTubeMobilePlayer-Android-Project.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android Project
+        run: |
+          mkdir project_src
+          unzip -o .github/YouTubeMobilePlayer-Android-Project.zip -d project_src
+
+      - name: Build Android APK
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.9'
+          build-root-directory: project_src
+          arguments: assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: YouTube-Mobile-Player-APK
+          path: project_src/app/build/outputs/apk/debug/app-debug.apk
